@@ -1,0 +1,22 @@
+﻿<%@ Master Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Public.master.cs" Inherits="SkiVerhuur_Rune.Public" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+    <nav class="navbar navbar-expand-md sticky-top">
+    <button class="navbar-toggler" type="button" dat-toggle="collapse" data-target="collapsibleNavbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+                    Verhuur
+                </a>
+                <div class="dropdown-menu">
+                    <a> </a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+</asp:Content>

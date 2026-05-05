@@ -13,15 +13,27 @@
 </head>
 <body>
     <form id="form1" runat="server">
-        <div id="wrapper" >
-            
-                 <header class="background"id="title">Ski Verhuur</header>
-           
-           
+
+        <div id="wrapper">
+            <header class="background" id="title">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <img src="images/sv_logo.png" />
+                    </div>
+                    <div class="col-sm-6">
+                        <h1 class="title">Ski Verhuur</h1>
+                    </div>
+
+                </div>
+                <asp:ContentPlaceHolder ID="ContentPlaceholder1" runat="server"></asp:ContentPlaceHolder>
+            </header>
+
+
+
             <div></div>
         </div>
-        <div>
-            <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+        <div id="content" class="container-fluid">
+            <asp:ContentPlaceHolder ID="ContentPlaceHolder2" runat="server">
             </asp:ContentPlaceHolder>
         </div>
     </form>
