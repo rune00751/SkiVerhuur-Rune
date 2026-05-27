@@ -2,9 +2,10 @@
     --primary-color: #004fc4;
     --text-color: #ffffff;
 }
-header {
+#header {
     background-color: var(--primary-color);
     color: var(--text-color);
+    vertical-align: central;
 }
 
 .site-header {
@@ -13,4 +14,24 @@ header {
 }
 .title {
     text-align: center;
+    vertical-align: central;
+    margin-bottom: 50px;
+    
 }
+footer {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    text-align: center;
+    padding: 10px 0;
+}
+.navbar {
+    background-color: none;
+}
+.Aanmelden {
+    width: 90%;
+    margin: auto;
+}
+#btnAanmelden {
+    padding-left: 10px;
+}
+

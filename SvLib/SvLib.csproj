@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DataObjects\" />
-    <Folder Include="Managers\" />
+    <Folder Include="DataManagers\" />
   </ItemGroup>
 
 </Project>

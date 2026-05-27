@@ -67,6 +67,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Aanmelden.aspx" />
+    <Content Include="Afmelden.aspx" />
     <Content Include="bootstrap-5.3.8-dist\css\bootstrap-grid.css" />
     <Content Include="bootstrap-5.3.8-dist\css\bootstrap-grid.min.css" />
     <Content Include="bootstrap-5.3.8-dist\css\bootstrap-grid.rtl.css" />
@@ -91,6 +93,8 @@
     <Content Include="bootstrap-5.3.8-dist\js\bootstrap.js" />
     <Content Include="bootstrap-5.3.8-dist\js\bootstrap.min.js" />
     <Content Include="Default.aspx" />
+    <Content Include="DefaultAangemeld.aspx" />
+    <Content Include="Huren.aspx" />
     <Content Include="images\no-image-available.png" />
     <Content Include="images\products\atomic-redster-c9-carbon-uni-m-shift.jpg" />
     <Content Include="images\products\atomic-redster-c9-skintec.jpg" />
@@ -123,12 +127,47 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aanmelden.aspx.cs">
+      <DependentUpon>Aanmelden.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Aanmelden.aspx.designer.cs">
+      <DependentUpon>Aanmelden.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Afmelden.aspx.cs">
+      <DependentUpon>Afmelden.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Afmelden.aspx.designer.cs">
+      <DependentUpon>Afmelden.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="DefaultAangemeld.aspx.cs">
+      <DependentUpon>DefaultAangemeld.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="DefaultAangemeld.aspx.designer.cs">
+      <DependentUpon>DefaultAangemeld.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Huren.aspx.cs">
+      <DependentUpon>Huren.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Huren.aspx.designer.cs">
+      <DependentUpon>Huren.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Private.master.cs">
+      <DependentUpon>Private.master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Private.master.designer.cs">
+      <DependentUpon>Private.master</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Public.master.cs">
@@ -172,12 +211,19 @@
     <None Include="packages.config" />
     <Content Include="Site.Master" />
     <Content Include="Public.master" />
+    <Content Include="Private.master" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SvLiv\SvLib.csproj">
+      <Project>{a2d1f932-2c10-45fe-a41c-bab9ba082a0c}</Project>
+      <Name>SvLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

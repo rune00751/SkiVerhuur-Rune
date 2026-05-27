@@ -7,11 +7,11 @@ using System.Web.UI.WebControls;
 
 namespace SkiVerhuur_Rune
 {
-    public partial class Site : System.Web.UI.MasterPage
+    public partial class DefaultAangemeld : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            string TypeSport = Request.QueryString["TypeSport"];
+
         }
     }
 }

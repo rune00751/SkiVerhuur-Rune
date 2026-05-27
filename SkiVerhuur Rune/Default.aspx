@@ -1,6 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="SkiVerhuur_Rune.Default" %>
-<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-</asp:Content>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Public.master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="SkiVerhuur_Rune.Default" %>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" runat="server">
      <div id="homeCarousel" class="carousel slide home-carousel" data-bs-ride="carousel">
         <div class="carousel-indicators">
@@ -13,14 +11,14 @@
                 <img class="d-block w-100" src="images/xc.jpg"  />
                 <div class="carousel-caption">
                     <h2>Langlaufen</h2>
-                    <a class="btn btn-primary carousel-cta" href="Default.aspx">Klik hier om je langlaufmateriaal te huren.</a>
+                    <a class="btn btn-primary  carousel-cta" id="base" href="Huren.aspx">Klik hier om je langlaufmateriaal te huren.</a>
                 </div>
             </div>
             <div class="carousel-item">
-                <img class="d-block w-100" src="images/ski.jpg" alt="Skier op een besneeuwde piste" />
+                <img class="d-block w-100" src="images/ski.jpg"  />
                 <div class="carousel-caption">
                     <h2>Alpineskiën</h2>
-                     <a class="btn btn-primary carousel-cta" href="Default.aspx">Klik hier om je Skimateriaal te huren.</a>
+                     <a class="btn btn-primary  carousel-cta" href="Huren.aspx">Klik hier om je Skimateriaal te huren.</a>
 </div>
             </div>
         </div>
