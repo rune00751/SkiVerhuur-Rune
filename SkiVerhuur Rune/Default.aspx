@@ -11,14 +11,14 @@
                 <img class="d-block w-100" src="images/xc.jpg"  />
                 <div class="carousel-caption">
                     <h2>Langlaufen</h2>
-                    <a class="btn btn-primary  carousel-cta" id="base" href="Huren.aspx">Klik hier om je langlaufmateriaal te huren.</a>
+                    <a class="btn btn-primary  carousel-cta" id="base" href="Huren.aspx?sport=Langlaufen">Klik hier om je langlaufmateriaal te huren.</a>
                 </div>
             </div>
             <div class="carousel-item">
                 <img class="d-block w-100" src="images/ski.jpg"  />
                 <div class="carousel-caption">
                     <h2>Alpineskiën</h2>
-                     <a class="btn btn-primary  carousel-cta" href="Huren.aspx">Klik hier om je Skimateriaal te huren.</a>
+                     <a class="btn btn-primary  carousel-cta" href="Huren.aspx?sport=Alpine">Klik hier om je AlpineMateriaal te huren.</a>
 </div>
             </div>
         </div>

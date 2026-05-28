@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SvLib.DataObjects
 {
+    [Serializable]
     public class WinkelmandItem
     {
         public int MateriaalMaatId { get; set; }

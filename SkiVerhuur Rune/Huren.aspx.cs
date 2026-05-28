@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -9,15 +10,13 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SvLib.DataObjects;
+using SvLib.Managers;
 
 namespace SkiVerhuur_Rune
 {
     public partial class Huren : System.Web.UI.Page
     {
-        private string ConnectionString
-        {
-            get { return ConfigurationManager.ConnectionStrings["Skiverhuur"].ConnectionString; }
-        }
+        private HurenManager hurenmanager = new HurenManager();
 
         private List<WinkelmandItem> Winkelmand
         {
@@ -95,7 +94,7 @@ namespace SkiVerhuur_Rune
             {
                 if (!ControleerDatums()) return;
 
-                int materiaalMaatId = GetMateriaalMaatId();
+                int materiaalMaatId = hurenmanager.GetMateriaalMaatId(Convert.ToInt32(ddlTypeMateriaal.SelectedValue), Convert.ToInt32(ddlMerk.SelectedValue));
                 if (materiaalMaatId == 0)
                 {
                     ToonBoodschap("Kies eerst een materiaal en maat.", "warning");
@@ -182,36 +181,7 @@ namespace SkiVerhuur_Rune
                     return;
                 }
 
-                using (SqlConnection ObjCn = new SqlConnection(ConnectionString))
-                {
-                    ObjCn.Open();
-                    SqlTransaction tr = ObjCn.BeginTransaction();
-
-                    try
-                    {
-                        int klantId = GetOrCreateKlant(ObjCn, tr, txtVoornaam.Text.Trim(), txtAchternaam.Text.Trim(), txtEmail.Text.Trim());
-
-                        foreach (WinkelmandItem item in Winkelmand)
-                        {
-                            int nogBeschikbaar = BerekenBeschikbaarVoorMateriaalMaat(ObjCn, tr, item.MateriaalMaatId, item.Begindatum, item.Einddatum);
-                            if (item.Aantal > nogBeschikbaar)
-                            {
-                                throw new Exception(item.Omschrijving + " is niet meer voldoende beschikbaar.");
-                            }
-
-                            int uitleningId = VoegUitleningToe(ObjCn, tr, klantId, item.Begindatum, item.Einddatum);
-                            VoegUitleningMateriaalToe(ObjCn, tr, uitleningId, item.MateriaalMaatId, item.Aantal);
-                            VerstuurMail(txtEmail.Text);
-                        }
-
-                        tr.Commit();
-                    }
-                    catch
-                    {
-                        tr.Rollback();
-                        throw;
-                    }
-                }
+                hurenmanager.BewaarBestelling(txtVoornaam.Text.Trim(), txtAchternaam.Text.Trim(), txtEmail.Text.Trim(), Winkelmand);
 
                 Winkelmand = new List<WinkelmandItem>();
                 ToonBoodschap("De bestelling werd geplaatst.", "success");
@@ -224,7 +194,7 @@ namespace SkiVerhuur_Rune
 
         private void BindTypeMateriaal()
         {
-            int typeSportId = GetTypeSportId(GetSportNaam());
+            int typeSportId = hurenmanager.GetTypeSportId(GetSportNaam());
 
             if (typeSportId == 0)
             {
@@ -233,13 +203,9 @@ namespace SkiVerhuur_Rune
                 return;
             }
 
-            DataTable dt = SelectDataTable(@"
-                SELECT Id, Naam
-                FROM TypeMateriaal
-                WHERE TypeSportId = @TypeSportId
-                ORDER BY Naam", new SqlParameter("@TypeSportId", typeSportId));
+            List<TypeMateriaal> typeMaterialen = hurenmanager.GetTypeMaterialen(typeSportId);
 
-            BindDropDown(ddlTypeMateriaal, dt, "Naam", "Id");
+            BindDropDown(ddlTypeMateriaal, typeMaterialen, "Naam", "Id");
         }
 
         private void BindMerken()
@@ -250,14 +216,9 @@ namespace SkiVerhuur_Rune
                 return;
             }
 
-            DataTable dt = SelectDataTable(@"
-                SELECT DISTINCT m.Id, m.Naam
-                FROM Merk m
-                INNER JOIN Materiaal mat ON mat.MerkId = m.Id
-                WHERE mat.TypeMateriaalId = @TypeMateriaalId
-                ORDER BY m.Naam", new SqlParameter("@TypeMateriaalId", ddlTypeMateriaal.SelectedValue));
+            List<Merk> merken = hurenmanager.GetMerkenVoorTypeMateriaal(Convert.ToInt32(ddlTypeMateriaal.SelectedValue));
 
-            BindDropDown(ddlMerk, dt, "Naam", "Id");
+            BindDropDown(ddlMerk, merken, "Naam", "Id");
         }
 
         private void BindMaterialen()
@@ -268,15 +229,9 @@ namespace SkiVerhuur_Rune
                 return;
             }
 
-            DataTable dt = SelectDataTable(@"
-                SELECT Id, Model
-                FROM Materiaal
-                WHERE TypeMateriaalId = @TypeMateriaalId AND MerkId = @MerkId
-                ORDER BY Model",
-                new SqlParameter("@TypeMateriaalId", ddlTypeMateriaal.SelectedValue),
-                new SqlParameter("@MerkId", ddlMerk.SelectedValue));
+            List<Materiaal> materialen = hurenmanager.GetMaterialen(Convert.ToInt32(ddlTypeMateriaal.SelectedValue), Convert.ToInt32(ddlMerk.SelectedValue));
 
-            BindDropDown(ddlMateriaal, dt, "Model", "Id");
+            BindDropDown(ddlMateriaal, materialen, "Model", "Id");
         }
 
         private void BindMaten()
@@ -287,14 +242,9 @@ namespace SkiVerhuur_Rune
                 return;
             }
 
-            DataTable dt = SelectDataTable(@"
-                SELECT ma.Id, ma.Naam
-                FROM Maat ma
-                INNER JOIN MateriaalMaat mm ON mm.MaatId = ma.Id
-                WHERE mm.MateriaalId = @MateriaalId
-                ORDER BY ma.Naam", new SqlParameter("@MateriaalId", ddlMateriaal.SelectedValue));
+            List<Maat> maten = hurenmanager.GetMatenVoorMateriaal(Convert.ToInt32(ddlMateriaal.SelectedValue));
 
-            BindDropDown(ddlMaat, dt, "Naam", "Id");
+            BindDropDown(ddlMaat, maten, "Naam", "Id");
         }
 
         private void ToonMateriaalFoto()
@@ -304,11 +254,10 @@ namespace SkiVerhuur_Rune
 
             if (string.IsNullOrEmpty(ddlMateriaal.SelectedValue)) return;
 
-            object foto = ("SELECT Foto FROM Materiaal WHERE Id = @Id",
-                new SqlParameter("@Id", ddlMateriaal.SelectedValue));
-            if (foto != null && foto != DBNull.Value && !string.IsNullOrWhiteSpace(foto.ToString()))
+            string foto = hurenmanager.GetFotoVoorMateriaal(Convert.ToInt32(ddlMateriaal.SelectedValue));
+            if (!string.IsNullOrWhiteSpace(foto))
             {
-                imgMateriaal.ImageUrl = "~/images/products/" + foto;
+                imgMateriaal.ImageUrl = "~/" + foto;
             }
             else
             {
@@ -327,20 +276,8 @@ namespace SkiVerhuur_Rune
             DateTime begin = DateTime.Parse(txtBegindatum.Text);
             DateTime einde = DateTime.Parse(txtEinddatum.Text);
 
-            int maxMateriaal = Convert.ToInt32(ExecuteScalar(
-                "SELECT Aantal FROM MateriaalMaat WHERE Id = @Id",
-                new SqlParameter("@Id", materiaalMaatId)) ?? 0);
-
-            int verhuurdMateriaal = Convert.ToInt32(ExecuteScalar(@"
-                SELECT ISNULL(SUM(um.Aantal), 0)
-                FROM UitleningMateriaal um
-                INNER JOIN Uitlening u ON u.Id = um.UitleningId
-                WHERE um.MateriaalMaatId = @MateriaalMaatId
-                  AND u.DatumUitlening <= @Einddatum
-                  AND u.DatumInlevering >= @Begindatum",
-                new SqlParameter("@MateriaalMaatId", materiaalMaatId),
-                new SqlParameter("@Begindatum", begin),
-                new SqlParameter("@Einddatum", einde)) ?? 0);
+            int maxMateriaal = hurenmanager.GetMaximumAantal(materiaalMaatId);
+            int verhuurdMateriaal = hurenmanager.GetVerhuurdAantal(materiaalMaatId, begin, einde);
 
             int gereserveerdInWinkelmand = 0;
             foreach (WinkelmandItem item in Winkelmand)
@@ -392,26 +329,12 @@ namespace SkiVerhuur_Rune
         {
             if (string.IsNullOrEmpty(ddlMateriaal.SelectedValue) || string.IsNullOrEmpty(ddlMaat.SelectedValue)) return 0;
 
-            object id = ExecuteScalar(@"
-                SELECT Id
-                FROM MateriaalMaat
-                WHERE MateriaalId = @MateriaalId AND MaatId = @MaatId",
-                new SqlParameter("@MateriaalId", ddlMateriaal.SelectedValue),
-                new SqlParameter("@MaatId", ddlMaat.SelectedValue));
-
-            return id == null || id == DBNull.Value ? 0 : Convert.ToInt32(id);
+            return hurenmanager.GetMateriaalMaatId(Convert.ToInt32(ddlMateriaal.SelectedValue), Convert.ToInt32(ddlMaat.SelectedValue));
         }
 
         private int GetTypeSportId(string sportNaam)
         {
-
-            string zoekterm = sportNaam.Equals("Langlaufen", StringComparison.OrdinalIgnoreCase) ? "Lang%" : "Alpine";
-
-            object id = ExecuteScalar(
-                "SELECT TOP 1 Id FROM TypeSport WHERE Naam LIKE @Naam ORDER BY Naam",
-                new SqlParameter("@Naam", zoekterm));
-
-            return id == null || id == DBNull.Value ? 0 : Convert.ToInt32(id);
+            return hurenmanager.GetTypeSportId(sportNaam);
         }
 
         private string GetSportNaam()
@@ -421,37 +344,17 @@ namespace SkiVerhuur_Rune
             return "Alpine";
         }
 
-        private void BindDropDown(DropDownList ddl, DataTable dt, string textField, string valueField)
+        private void BindDropDown(DropDownList ddl, object gegevens, string textField, string valueField)
         {
-            ddl.DataSource = dt;
+            ddl.DataSource = gegevens;
             ddl.DataTextField = textField;
             ddl.DataValueField = valueField;
             ddl.DataBind();
         }
 
-        private DataTable SelectDataTable(string sql, params SqlParameter[] parameters)
-        {
-            using (SqlConnection cn = new SqlConnection(ConnectionString))
-            using (SqlCommand cmd = new SqlCommand(sql, cn))
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-            {
-                cmd.Parameters.AddRange(parameters);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
-        }
+       
 
-        private object ExecuteScalar(string sql, params SqlParameter[] parameters)
-        {
-            using (SqlConnection cn = new SqlConnection(ConnectionString))
-            using (SqlCommand cmd = new SqlCommand(sql, cn))
-            {
-                cmd.Parameters.AddRange(parameters);
-                cn.Open();
-                return cmd.ExecuteScalar();
-            }
-        }
+        
 
         private void BindWinkelmand(GridView grid)
         {
@@ -465,7 +368,7 @@ namespace SkiVerhuur_Rune
                 "var myModal = new bootstrap.Modal(document.getElementById('" + modalId + "')); myModal.show();", true);
         }
 
-        private void ToonBoodschap(string boodschap, string type)
+        private void ToonBoodschap(string boodschap, string type) 
         {
             pnlMessage.Visible = true;
             pnlMessage.CssClass = "alert alert-" + type;
@@ -473,121 +376,8 @@ namespace SkiVerhuur_Rune
         }
 
 
-        private int BerekenBeschikbaarVoorMateriaalMaat(SqlConnection cn, SqlTransaction tr, int materiaalMaatId, DateTime begin, DateTime einde)
-        {
-            int maxMateriaal;
-
-            using (SqlCommand cmd = new SqlCommand("SELECT Aantal FROM MateriaalMaat WHERE Id = @Id", cn, tr))
-            {
-                cmd.Parameters.AddWithValue("@Id", materiaalMaatId);
-                object result = cmd.ExecuteScalar();
-                maxMateriaal = result == null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
-            }
-
-            int verhuurdMateriaal;
-            using (SqlCommand cmd = new SqlCommand(@"
-                SELECT ISNULL(SUM(um.Aantal), 0)
-                FROM UitleningMateriaal um
-                INNER JOIN Uitlening u ON u.Id = um.UitleningId
-                WHERE um.MateriaalMaatId = @MateriaalMaatId
-                  AND u.DatumUitlening <= @Einddatum
-                  AND u.DatumInlevering >= @Begindatum", cn, tr))
-            {
-                cmd.Parameters.AddWithValue("@MateriaalMaatId", materiaalMaatId);
-                cmd.Parameters.AddWithValue("@Begindatum", begin);
-                cmd.Parameters.AddWithValue("@Einddatum", einde);
-                verhuurdMateriaal = Convert.ToInt32(cmd.ExecuteScalar());
-            }
-
-            return Math.Max(0, maxMateriaal - verhuurdMateriaal);
-        }
-
-        private int GetOrCreateKlant(SqlConnection cn, SqlTransaction tr, string voornaam, string achternaam, string email)
-        {
-            using (SqlCommand cmd = new SqlCommand("SELECT TOP 1 Id FROM Klant WHERE Email = @Email", cn, tr))
-            {
-                cmd.Parameters.AddWithValue("@Email", email);
-                object result = cmd.ExecuteScalar();
-                if (result != null && result != DBNull.Value) return Convert.ToInt32(result);
-            }
-
-            using (SqlCommand cmd = new SqlCommand(@"
-                INSERT INTO Klant (Voornaam, Achternaam, Email)
-                VALUES (@Voornaam, @Achternaam, @Email);
-                SELECT SCOPE_IDENTITY();", cn, tr))
-            {
-                cmd.Parameters.AddWithValue("@Voornaam", voornaam);
-                cmd.Parameters.AddWithValue("@Achternaam", achternaam);
-                cmd.Parameters.AddWithValue("@Email", email);
-                return Convert.ToInt32(cmd.ExecuteScalar());
-            }
-        }
-
-        private int VoegUitleningToe(SqlConnection cn, SqlTransaction tr, int klantId, DateTime begin, DateTime einde)
-        {
-            using (SqlCommand cmd = new SqlCommand(@"
-                INSERT INTO Uitlening (KlantId, DatumUitlening, DatumInlevering)
-                VALUES (@KlantId, @DatumUitlening, @DatumInlevering);
-                SELECT SCOPE_IDENTITY();", cn, tr))
-            {
-                cmd.Parameters.AddWithValue("@KlantId", klantId);
-                cmd.Parameters.AddWithValue("@DatumUitlening", begin);
-                cmd.Parameters.AddWithValue("@DatumInlevering", einde);
-                return Convert.ToInt32(cmd.ExecuteScalar());
-            }
-        }
-
-        private void VoegUitleningMateriaalToe(SqlConnection cn, SqlTransaction tr, int uitleningId, int materiaalMaatId, int aantal)
-        {
-            using (SqlCommand cmd = new SqlCommand(@"
-                INSERT INTO UitleningMateriaal (UitleningId, MateriaalMaatId, Aantal)
-                VALUES (@UitleningId, @MateriaalMaatId, @Aantal)", cn, tr))
-            {
-                cmd.Parameters.AddWithValue("@UitleningId", uitleningId);
-                cmd.Parameters.AddWithValue("@MateriaalMaatId", materiaalMaatId);
-                cmd.Parameters.AddWithValue("@Aantal", aantal);
-                cmd.ExecuteNonQuery();
-            }
-        }
-        private void VerstuurMail(string naar)
-        {
-            try
-            {
-                string inhoud = "Uw bestelling bij Ski Verhuur is bevestigd.\n\n";
-
-                List<WinkelmandItem> winkelmand =
-                    (List<WinkelmandItem>)Session["winkelmand"];
-
-                foreach (WinkelmandItem item in winkelmand)
-                {
-                    inhoud += "Artikel: " + item.TypeMateriaal + "\n";
-                    inhoud += "Maat: " + item.Maat + "\n";
-                    inhoud += "Aantal: " + item.Aantal + "\n";
-                    inhoud += "Periode: " +
-                               item.Begindatum.ToShortDateString() +
-                               " tot " +
-                               item.Einddatum.ToShortDateString() + "\n\n";
-                }
-
-                inhoud += "Bedankt voor uw bestelling bij Ski Verhuur.";
-
-                MailMessage mail = new MailMessage();
-                mail.From = new MailAddress("runevanhofstraeten@gmail.com");
-                mail.To.Add(naar);
-
-                mail.Subject = "Bestelling skiverhuur bevestigd";
-                mail.Body = inhoud;
-
-                SmtpClient smtp = new SmtpClient();
-                smtp.Send(mail);
-            }
-            catch (Exception ex)
-            {
-                litMessage.Text = ex.Message;
-                pnlMessage.Visible = true;
-            }
+       
         }
 
 
     }
-}

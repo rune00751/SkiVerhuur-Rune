@@ -14,8 +14,8 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Huren</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="Huren.aspx">Langlaufen</a></li>
-            <li><a class="dropdown-item" href="Huren.aspx">Alpineskiën</a></li>
+            <li><a class="dropdown-item" href="Huren.aspx?sport=Langlaufen">Langlaufen</a></li>
+            <li><a class="dropdown-item" href="Huren.aspx?sport=Alpine">Alpineskiën</a></li>
           </ul>
 
              

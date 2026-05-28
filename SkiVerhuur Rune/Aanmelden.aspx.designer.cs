@@ -15,6 +15,24 @@ namespace SkiVerhuur_Rune
     {
 
         /// <summary>
+        /// pnlMelding control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlMelding;
+
+        /// <summary>
+        /// lblMelding control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblMelding;
+
+        /// <summary>
         /// txtGebruikersnaam control.
         /// </summary>
         /// <remarks>
